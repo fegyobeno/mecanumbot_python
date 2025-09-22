@@ -8,8 +8,8 @@ import tty
 # Control table address and protocol version
 PROTOCOL_VERSION = 2.0
 DEVICENAME = '/dev/ttyACM0'
-BAUDRATE = 115200
-#BAUDRATE = 1000000
+#BAUDRATE = 115200
+BAUDRATE = 1000000
 #BAUDRATE=57600
 #BAUDRATE=9600
 DXL_ID = int(sys.argv[1]) if len(sys.argv) > 1 else 200  # Dynamixel ID
@@ -22,9 +22,21 @@ BYTE_SIZE = int(sys.argv[4]) if len(sys.argv)>4 else 1
 
 SPEED = 20
 
+MECANUMBOT_MIN_CAM_POS = 200
+
+MECANUMBOT_MAX_CAM_POS = 860
+
+MECANUMBOT_MIN_GRIPPER_POS = 160
+
+MECANUMBOT_FRONT_GRIPPER_POS = 512
+
+MECANUMBOT_MAX_GRIPPER_POS = 854
+
 def read(id, addr, BYTE_SIZE=BYTE_SIZE):
     if BYTE_SIZE == 1:
         value = packetHandler.read1ByteTxRx(portHandler, id, addr)
+    if BYTE_SIZE == 2:
+        value = packetHandler.read2ByteTxRx(portHandler, id, addr)
     if BYTE_SIZE == 4:
         value = packetHandler.read4ByteTxRx(portHandler, id, addr)
     result = value[0]
@@ -67,16 +79,21 @@ def start():
 
     print(f'Using ID: {DXL_ID}, Address: {ADDR}, Write: {WRITE}, Byte Size: {BYTE_SIZE}')
     print("Enable debug mode") # python3 read.py 200 14 1 1
-    write(DXL_ID, 16, 1, 4)  # Enable debug mode
+    write(DXL_ID, 14, 1, 4)  # Enable debug mode
 
-    print("set torque")
+    print("set XM torque")
     write(DXL_ID, 169, 1, 1)  # Set torque enable
+
+    print("set AX torque")
+    write(DXL_ID, 210, 1, 4)  # Set torque enable
 
 def end():
     print("Disable debug mode")
-    write(DXL_ID, 16, 0, 4)  # Disable debug mode
+    write(DXL_ID, 14, 0, 1)  # Disable debug mode
     print("Disable torque")
     write(DXL_ID, 169, 0, 1)  # Set torque disable
+    print("Disable AX torque")
+    write(DXL_ID, 210, 0, 4)  # Set torque disable
 
 def getch():
         fd = sys.stdin.fileno()
@@ -90,6 +107,7 @@ def getch():
 
 def main():
     try:
+        global portHandler, packetHandler
         # Initialize PortHandler and PacketHandler
         portHandler = PortHandler(DEVICENAME)
         packetHandler = PacketHandler(PROTOCOL_VERSION)
@@ -106,37 +124,34 @@ def main():
                 print("Space pressed. Stopping all motors.")
                 write(DXL_ID, 170, 0, 4)
                 write(DXL_ID, 174, 0, 4)
-                write(DXL_ID, 182, 0, 4)
-                write(DXL_ID, 186, 0, 4)
+                write(DXL_ID, 190, 0, 4)
             if key == '':
                 print("Quitting...")
                 break
-            elif key in ['a', 's', 'd', 'w', 'e', 'q']:
+            elif key in ['a', 's', 'd', 'w', 'e', 'q', 'i', 'k', 'j', 'l']:
                 print(f"Key pressed: {key}")
-                # You can add code here to handle each key as needed
-
-                if key == 'w':
+                if key == 'w': #forward
                     write(DXL_ID, 170, SPEED, 4)
-                    #pass
-
-                elif key == 's':
+                elif key == 's': #backward
                     write(DXL_ID, 170, -SPEED, 4)
-                    #pass
-
-                elif key == 'd':
-                    #pass
+                elif key == 'd': #right
                     write(DXL_ID, 174, SPEED, 4)
-
-                elif key == 'a':
+                elif key == 'a': #left
                     write(DXL_ID, 174, -SPEED, 4)
-
-                elif key == 'q':
-                    #pass
-                    write(DXL_ID, 182, SPEED, 4)
-                elif key == 'e':
-                    #pass
-                    write(DXL_ID, 182, -SPEED, 4)
-                    #pass
+                elif key == 'q': #turn left
+                    write(DXL_ID, 190, SPEED, 4)
+                elif key == 'e': #turn right
+                    write(DXL_ID, 190, -SPEED, 4)
+                elif key == 'i': #cam_up
+                    write(DXL_ID, 214, MECANUMBOT_MAX_CAM_POS, 4 )
+                elif key == 'k': #cam_down
+                    write(DXL_ID, 214, MECANUMBOT_MIN_CAM_POS, 4 )
+                elif key == 'j': #open gripper
+                    write(DXL_ID, 218, 360, 4 )
+                    write(DXL_ID, 222, 800, 4 )
+                elif key == 'l': #close gripper,
+                    write(DXL_ID, 218, 800, 4 )
+                    write(DXL_ID, 222, 360, 4 )
 
 
     except Exception as e:
