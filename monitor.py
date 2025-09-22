@@ -84,6 +84,16 @@ CONTROL_TABLE = [
     ("ADDR_PROFILE_ACC_FR", 198, 4, True, False),
     ("ADDR_PROFILE_ACC_BL", 202, 4, True, False),
     ("ADDR_PROFILE_ACC_BR", 206, 4, True, False),
+    
+    ("AX_ADDR_TORQUE", 210, 1, False, False),
+    ("AX_ADDR_NECK_GOAL", 214, 1, False, False),
+    ("AX_ADDR_GRABBER_LEFT_GOAL", 218, 1, False, False),
+    ("AX_ADDR_GRABBER_RIGHT_GOAL", 222, 1, False, False),
+
+    ("AX_ADDR_PRESENT_NECK_POSITION", 226, 4, True, False),
+
+    ("AX_ADDR_PRESENT_GRABBER_LEFT_POSITION", 230, 4, True, False),
+    ("AX_ADDR_PRESENT_GRABBER_RIGHT_POSITION", 234, 4, True, False),
 ]
 
 # Helper read functions using PacketHandler
