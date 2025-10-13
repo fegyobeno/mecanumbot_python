@@ -123,6 +123,8 @@ def main():
 
         print("Press 'a', 's', 'd', 'w', 'e', 'q', 'i', 'k', 'j', 'l' for input, space to stop, Esc to quit.")
         while True:
+            # limits the users ability to one command per 0.1 second. Seems to solve the stack smashing issue 
+            sleep(0.1) # sleep 
             key = getch()
             if key == '\x1b':  # Escape key
                 print("Escape pressed. Quitting...")
