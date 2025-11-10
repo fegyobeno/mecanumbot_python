@@ -14,16 +14,16 @@ else:
 # Control table configuration: (name, addr, size_bytes, signed, is_float)
 # IMPORTANT: These are educated guesses. Adjust sizes/types for your firmware/control table.
 CONTROL_TABLE = [
-    ("ADDR_MODEL_INFORM", 2, 1, False, False),
+    ("ADDR_MODEL_INFORM", 2, 4, False, False),  # uint32_t
 
-    ("ADDR_MILLIS", 10, 4, False, False),
+    ("ADDR_MILLIS", 10, 4, False, False),  # uint32_t
 
-    ("ADDR_DEBUG_MODE", 14, 1, False, False),
-    ("ADDR_CONNECT_ROS2", 15, 1, False, False),
-    ("ADDR_CONNECT_MANIP", 16, 1, False, False),
+    ("ADDR_DEBUG_MODE", 14, 1, False, False),  # bool
+    ("ADDR_CONNECT_ROS2", 15, 1, False, False),  # bool
+    ("ADDR_CONNECT_MANIP", 16, 1, False, False),  # bool
 
-    ("ADDR_DEVICE_STATUS", 18, 1, False, False),
-    ("ADDR_HEARTBEAT", 19, 1, False, False),
+    ("ADDR_DEVICE_STATUS", 18, 1, True, False),  # int8_t
+    ("ADDR_HEARTBEAT", 19, 1, False, False),  # uint8_t
 
     ("ADDR_USER_LED_1", 20, 1, False, False),
     ("ADDR_USER_LED_2", 21, 1, False, False),
@@ -35,16 +35,16 @@ CONTROL_TABLE = [
     ("ADDR_BUMPER_1", 28, 1, False, False),
     ("ADDR_BUMPER_2", 29, 1, False, False),
 
-    ("ADDR_ILLUMINATION", 30, 2, False, False),
-    ("ADDR_IR", 34, 2, False, False),
-    ("ADDR_SORNA", 38, 2, False, False),
+    ("ADDR_ILLUMINATION", 30, 2, False, False),  # uint16_t
+    ("ADDR_IR", 34, 4, False, False),             # uint32_t
+    ("ADDR_SORNA", 38, 4, True, True),            # float
 
-    ("ADDR_BATTERY_VOLTAGE", 42, 4, False, True),
-    ("ADDR_BATTERY_PERCENT", 46, 1, False, False),
+    ("ADDR_BATTERY_VOLTAGE", 42, 4, False, False),  # uint32_t (x100)
+    ("ADDR_BATTERY_PERCENT", 46, 4, False, False),  # uint32_t (x100)
 
-    ("ADDR_SOUND", 50, 1, False, False),
+    ("ADDR_SOUND", 50, 1, False, False),  # uint8_t
 
-    ("ADDR_IMU_RECALIBRATION", 59, 1, False, False),
+    ("ADDR_IMU_RECALIBRATION", 59, 1, False, False),  # bool
     ("ADDR_ANGULAR_VELOCITY_X", 60, 4, True, True),
     ("ADDR_ANGULAR_VELOCITY_Y", 64, 4, True, True),
     ("ADDR_ANGULAR_VELOCITY_Z", 68, 4, True, True),
@@ -59,41 +59,42 @@ CONTROL_TABLE = [
     ("ADDR_ORIENTATION_Y", 104, 4, True, True),
     ("ADDR_ORIENTATION_Z", 108, 4, True, True),
 
-    ("ADDR_PRESENT_CURRENT_FL", 120, 4, True, True),
-    ("ADDR_PRESENT_CURRENT_FR", 124, 4, True, True),
-    ("ADDR_PRESENT_CURRENT_BL", 128, 4, True, True),
-    ("ADDR_PRESENT_CURRENT_BR", 132, 4, True, True),
-    ("ADDR_PRESENT_VELOCITY_FL", 136, 4, True, True),
-    ("ADDR_PRESENT_VELOCITY_FR", 140, 4, True, True),
-    ("ADDR_PRESENT_VELOCITY_BL", 144, 4, True, True),
-    ("ADDR_PRESENT_VELOCITY_BR", 148, 4, True, True),
-    ("ADDR_PRESENT_POSITION_FL", 152, 4, True, False),
-    ("ADDR_PRESENT_POSITION_FR", 156, 4, True, False),
-    ("ADDR_PRESENT_POSITION_BL", 160, 4, True, False),
-    ("ADDR_PRESENT_POSITION_BR", 164, 4, True, False),
+    # Present currents/velocities/positions (int32_t), order: BL, BR, FL, FR
+    ("ADDR_PRESENT_CURRENT_BL", 120, 4, True, False),
+    ("ADDR_PRESENT_CURRENT_BR", 124, 4, True, False),
+    ("ADDR_PRESENT_CURRENT_FL", 128, 4, True, False),
+    ("ADDR_PRESENT_CURRENT_FR", 132, 4, True, False),
+    ("ADDR_PRESENT_VELOCITY_BL", 136, 4, True, False),
+    ("ADDR_PRESENT_VELOCITY_BR", 140, 4, True, False),
+    ("ADDR_PRESENT_VELOCITY_FL", 144, 4, True, False),
+    ("ADDR_PRESENT_VELOCITY_FR", 148, 4, True, False),
+    ("ADDR_PRESENT_POSITION_BL", 152, 4, True, False),
+    ("ADDR_PRESENT_POSITION_BR", 156, 4, True, False),
+    ("ADDR_PRESENT_POSITION_FL", 160, 4, True, False),
+    ("ADDR_PRESENT_POSITION_FR", 164, 4, True, False),
 
-    ("ADDR_MOTOR_CONNECT", 168, 1, False, False),
-    ("ADDR_MOTOR_TORQUE", 169, 1, False, False),
-    ("ADDR_CMD_VEL_LINEAR_X", 170, 4, True, True),
-    ("ADDR_CMD_VEL_LINEAR_Y", 174, 4, True, True),
-    ("ADDR_CMD_VEL_LINEAR_Z", 178, 4, True, True),
-    ("ADDR_CMD_VEL_ANGULAR_X", 182, 4, True, True),
-    ("ADDR_CMD_VEL_ANGULAR_Y", 186, 4, True, True),
-    ("ADDR_CMD_VEL_ANGULAR_Z", 190, 4, True, True),
-    ("ADDR_PROFILE_ACC_FL", 194, 4, True, False),
-    ("ADDR_PROFILE_ACC_FR", 198, 4, True, False),
-    ("ADDR_PROFILE_ACC_BL", 202, 4, True, False),
-    ("ADDR_PROFILE_ACC_BR", 206, 4, True, False),
+    ("ADDR_MOTOR_CONNECT", 168, 1, False, False),  # bool
+    ("ADDR_MOTOR_TORQUE", 169, 1, False, False),   # bool
+    ("ADDR_CMD_VEL_LINEAR_X", 170, 4, True, False),
+    ("ADDR_CMD_VEL_LINEAR_Y", 174, 4, True, False),
+    ("ADDR_CMD_VEL_LINEAR_Z", 178, 4, True, False),
+    ("ADDR_CMD_VEL_ANGULAR_X", 182, 4, True, False),
+    ("ADDR_CMD_VEL_ANGULAR_Y", 186, 4, True, False),
+    ("ADDR_CMD_VEL_ANGULAR_Z", 190, 4, True, False),
+    ("ADDR_PROFILE_ACC_BL", 194, 4, False, False),
+    ("ADDR_PROFILE_ACC_BR", 198, 4, False, False),
+    ("ADDR_PROFILE_ACC_FL", 202, 4, False, False),
+    ("ADDR_PROFILE_ACC_FR", 206, 4, False, False),
     
-    ("AX_ADDR_TORQUE", 210, 1, False, False),
-    ("AX_ADDR_NECK_GOAL", 214, 1, False, False),
-    ("AX_ADDR_GRABBER_LEFT_GOAL", 218, 1, False, False),
-    ("AX_ADDR_GRABBER_RIGHT_GOAL", 222, 1, False, False),
+    # AX (Protocol 1.0) window mapped as 32-bit values for goals/present
+    ("AX_ADDR_TORQUE", 210, 1, False, False),  # bool
+    ("AX_ADDR_NECK_GOAL", 214, 4, True, False),
+    ("AX_ADDR_GRABBER_LEFT_GOAL", 218, 4, True, False),
+    ("AX_ADDR_GRABBER_RIGHT_GOAL", 222, 4, True, False),
 
-    ("AX_ADDR_PRESENT_NECK_POSITION", 226, 4, True, False),
-
-    ("AX_ADDR_PRESENT_GRABBER_LEFT_POSITION", 230, 4, True, False),
-    ("AX_ADDR_PRESENT_GRABBER_RIGHT_POSITION", 234, 4, True, False),
+    ("AX_ADDR_PRESENT_NECK_POSITION", 226, 4, False, False),
+    ("AX_ADDR_PRESENT_GRABBER_LEFT_POSITION", 230, 4, False, False),
+    ("AX_ADDR_PRESENT_GRABBER_RIGHT_POSITION", 234, 4, False, False),
 ]
 
 # Helper read functions using PacketHandler
