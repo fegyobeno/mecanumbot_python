@@ -21,9 +21,9 @@ wheel_vel1 = 0
 wheel_vel2 = 0
 wheel_vel3 = 0
 wheel_vel4 = 0
-ax_pos1 = 0
-ax_pos2 = 0
-ax_pos3 = 0
+ax_pos1 = (MECANUMBOT_MAX_CAM_POS - MECANUMBOT_MIN_CAM_POS) // 2
+ax_pos2 = MECANUMBOT_CLOSED_GRIPPER_POS
+ax_pos3 = MECANUMBOT_CLOSED_GRIPPER_POS
 
 # Packet layout (matches Arduino changes)
 PAYLOAD_FMT = '<7h14f'            # 7 int16, 14 floats
@@ -168,6 +168,7 @@ try:
     reader.start()
     print("Serial read thread started.")
     print("Press 'a','s','d','w','e','q','i','k','j','l' for control, space to stop, Esc to quit.")
+    print("Press 1-10 to controll speed")
 
     while True:
         key = getch()
@@ -199,10 +200,17 @@ try:
             ax_pos1 = MECANUMBOT_MIN_CAM_POS
         elif key == 'j':
             ax_pos2 = MECANUMBOT_CLOSED_GRIPPER_POS
-            ax_pos3 = MECANUMBOT_CLOSED_GRIPPER_POS
+            ax_pos3 = MECANUMBOT_OPEN_GRIPPER_POS
         elif key == 'l':
             ax_pos2 = MECANUMBOT_OPEN_GRIPPER_POS
-            ax_pos3 = MECANUMBOT_OPEN_GRIPPER_POS
+            ax_pos3 = MECANUMBOT_CLOSED_GRIPPER_POS
+        elif key in '1234567890':
+            num = int(key)
+            if num == 0:
+                SPEED = 100
+            else:
+                SPEED = num * 10
+            print(f"Speed set to {SPEED}")
 
         fmt = '<7h'
         message_bytes = struct.pack(fmt,
