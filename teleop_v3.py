@@ -168,7 +168,7 @@ try:
     reader.start()
     print("Serial read thread started.")
     print("Press 'a','s','d','w','e','q','i','k','j','l' for control, space to stop, Esc to quit.")
-    print("Press 1-10 to controll speed")
+    print("Press 1-10, t - TURBOOOO to controll speed")
 
     while True:
         key = getch()
@@ -210,6 +210,9 @@ try:
                 SPEED = 100
             else:
                 SPEED = num * 10
+            print(f"Speed set to {SPEED}")
+        elif key == 't':
+            SPEED = 250
             print(f"Speed set to {SPEED}")
 
         fmt = '<7h'
