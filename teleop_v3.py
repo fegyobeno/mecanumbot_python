@@ -1,9 +1,35 @@
 import serial
 import struct
-import msvcrt
 import threading
 import time
 import math
+import os
+
+# check the operating system
+if os.name == 'nt':
+    import msvcrt
+    # Get a single character from keyboard without echo
+    # Block until a key is pressed
+    # WINDOWS only
+    def getch():
+        ch_bytes = msvcrt.getch()
+        try:
+            return ch_bytes.decode('utf-8')
+        except UnicodeDecodeError:
+            return ch_bytes
+else :
+    import tty
+    import termios
+    # LINUX / MAC only
+    def getch():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
 
 # --- Constants ---
 DEVICENAME = 'COM3'
@@ -34,8 +60,11 @@ CRC_SIZE = 1
 FULL_PACKET_SIZE = len(MAGIC) + SEQ_SIZE + PAYLOAD_SIZE + CRC_SIZE  # 74
 
 # --- helper functions ---
+# CRC8-CCITT implementation
+# Find the first occurrence of MAGIC in the buffer, then check if a full packet is present
+# If a full packet is present, validate CRC and unpack the payload
+# !! It has to match the Arduino implementation exactly !!
 def crc8_ccitt(data: bytes) -> int:
-    """Match Arduino crc8_ccitt implementation (poly 0x07, MSB-first)."""
     crc = 0x00
     for b in data:
         crc ^= b
@@ -46,12 +75,6 @@ def crc8_ccitt(data: bytes) -> int:
                 crc = (crc << 1) & 0xFF
     return crc & 0xFF
 
-def getch():
-    ch_bytes = msvcrt.getch()
-    try:
-        return ch_bytes.decode('utf-8')
-    except UnicodeDecodeError:
-        return ch_bytes
 
 # Plausibility thresholds - tune for your robot
 MAX_WHEEL_SPEED = 10000   # large enough but will filter extreme garbage
@@ -59,6 +82,9 @@ MIN_POS = -1000           # Theoretically impossible
 MAX_POS = 10000           # Theoretically impossible
 MAX_FLOAT_ABS = 1e7       # reject obvious garbage floats
 
+# Plausibility check for received payload
+# Returns True if the payload is plausible, False otherwise
+# A payload is plausible if it fits within certain ranges for wheel speeds, positions, and float values
 def plausible_payload(vals):
     # vals: tuple of 7 shorts then 14 floats
     shorts = vals[:7]
@@ -77,6 +103,9 @@ def plausible_payload(vals):
             return False
     return True
 
+# Serial read thread function
+# Reads from serial port, looks for packets, validates and unpacks them
+# Displays the received values
 def read_thread_fn(ser):
     buf = bytearray()
     while True:
@@ -164,6 +193,7 @@ reader = None
 try:
     ser = serial.Serial(DEVICENAME, BAUDRATE, timeout=0.1)
     print("Serial port opened successfully.")
+    # Start the read thread with the same serial monitor to avoid conflicts on the port
     reader = threading.Thread(target=read_thread_fn, args=(ser,), daemon=True)
     reader.start()
     print("Serial read thread started.")
